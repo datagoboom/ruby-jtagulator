@@ -32,7 +32,50 @@ Or install it yourself as:
 
 ## Usage
 
-Check out the examples folder for basic usage.
+First off, you should probably become familiar with [what the JTAGulator can do](https://github.com/grandideastudio/jtagulator/wiki). 
+
+To perform UART pin discovery:
+
+```ruby
+require 'jtagulator'
+
+# Debug mode outputs a ton of live interaction data, omit this param (or set to false) to turn it off
+uart = Jtagulator::API::UART.new(port: "/dev/ttyUSB0", debug: true)
+
+# Starts the live session with the Jtagulator hardware
+uart.start_session
+
+# Collects results of scan
+res = uart.identify(
+        wait_limit: 30, # optional, default timeout is 120s for pin discovery
+        # here are all of the available options, none of them are required to operate
+        options: {
+          voltage: 1.5,
+          start_pin: 0,
+          end_pin: 1,
+          known_pins: false,
+          output_str: "\\x0D",
+          delay: 10,
+          ignore_non_printable: false,
+          bring_low: false,
+          low_time: 100,
+          high_time: 100
+        }
+      ).to_s.green
+
+# returns (if found):
+# {
+#  "txd" => 0,
+#  "rxd" => 1,
+#  "baud": 115200,
+#  "data": {
+#    "raw": [0x0A, 0x0D],
+#    "ascii": ".."
+#  }
+#} 
+```
+
+For more info, check out the examples folder.
 
 
 ## Contributing
