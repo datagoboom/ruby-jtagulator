@@ -7,7 +7,7 @@ def continuous_identify
   ["DEFAULT", "IDCODE", "BYPASS", "RTCK"].each do |mode|
     puts jtag.identify(
       id_mode: mode,  # Optional, defaults to "DEFAULT" (j option)
-      wait_limit: 30, # Optional, defaults to 120
+      wait_limit: 5, # Optional, defaults to 120
       options: {
         start_pin: 0,
         end_pin: 9,

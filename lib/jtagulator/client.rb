@@ -22,7 +22,7 @@ module Jtagulator
         log("Starting session")
         @port.flush_input
         @port.write(0x68)
-        @port.read_timeout = 5000 # timeout in milliseconds
+        @port.read_timeout = 2000 # timeout in milliseconds
         res = safe_read
         if res == "NO_RESPONSE_LIMIT_REACHED" || res.inspect.to_s.length < 5
           log("Failed to start session, attempting to restart", error: true)
@@ -32,18 +32,18 @@ module Jtagulator
         end
       end
 
-      def safe_read(wait_limit: 5)
+      def safe_read(wait_limit: 3)
         reading = false
         wait_time = 0
         begin
           @port.read_nonblock(1024)
         rescue IO::WaitReadable
-          log("Waiting for data") unless reading
+          log("Waiting for response from board...") unless reading
           sleep 0.1
           reading = true
           wait_time += 0.1
           if wait_time > wait_limit
-            log("No response after #{wait_limit} seconds, you may need to manually restart device", error: true)
+            log("No response after #{wait_limit} seconds", error: true)
             return "NO_RESPONSE_LIMIT_REACHED"
           end
           retry
@@ -51,6 +51,8 @@ module Jtagulator
       end
 
       def set_mode(mode)
+        log("Attempting to go to main menu")
+        go_to_main_menu
         log("Setting device mode")
         map = {
           "j" => "JTAG",
@@ -60,6 +62,7 @@ module Jtagulator
         }
         begin
           @port.write(mode + "\r")
+          sleep 1
         rescue Errno::EIO
           sleep 0.1
           retry
@@ -71,12 +74,30 @@ module Jtagulator
           sleep 0.1
           retry
         end
-        set_mode(mode) unless res.include?(map[mode])
+
+        unless res.include?(map[mode])
+          log(res, error: true)
+          send_key("m") 
+          set_mode(mode) 
+        end
+      end
+
+      def go_to_main_menu
+        3.times do
+          send_key("m")
+          sleep 0.25
+        end
       end
 
       def send_key(key)
         @port.write("#{key}\r")
-        log(safe_read)
+        res = safe_read
+        log(res)
+        if res == ("?\r\r\n") || res.include?("Value out of range!")
+          return false 
+        else
+          return true
+        end
       end
 
       def log(message, error: false)
@@ -101,6 +122,16 @@ module Jtagulator
             end
           end
         end
+      end
+
+      def collect_results_until_complete
+        results = []
+        until (response = safe_read).include?("complete")
+          result = response.strip
+          results << result unless result == "-" || result.empty?
+          log(response)
+        end
+        results
       end
     end
   end

@@ -23,6 +23,9 @@ module Jtagulator
         @client.set_mode("j")
         @client.log("Identifying JTAG pins, mode: #{id_mode}")
         configure_identify(id_mode, wait_limit, options)
+        response = @client.safe_read(wait_limit: wait_limit)
+
+        results = @client.collect_results_until_complete
       end
 
       def configure_identify(id_mode, wait_limit, options)

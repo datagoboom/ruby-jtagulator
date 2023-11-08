@@ -26,11 +26,12 @@ module Jtagulator
 
         response = @client.safe_read(wait_limit: wait_limit)
 
-        results = collect_results_until_complete
+        results = @client.collect_results_until_complete
         parsed_results = parse_results(results)
 
         @client.log("UART pin identification complete")
         @client.log("No results, is the target connected?", error: true) if results == []
+
         parsed_results
       end
 
@@ -67,6 +68,7 @@ module Jtagulator
           high_time: 100
         }
 
+        orig_opts = options
         options = default_options.merge(options)
 
         keys = [
@@ -82,10 +84,19 @@ module Jtagulator
         ]
 
         keys.push(options[:low_time].to_s, options[:high_time].to_s) if options[:bring_low]
+
+        recovered = false
+
         keys.each do |key|
-          @client.send_key(key)
+          success = @client.send_key(key)
+          unless success
+            @client.log("Invalid output, restarting", error: true)
+            configure_identify(orig_opts)
+            recovered = true
+            break
+          end
         end
-        @port.write(" ")
+        @port.write(" ") unless recovered
       end
 
       def configure_passthrough(options)
@@ -112,16 +123,6 @@ module Jtagulator
         keys.each do |key|
           @client.send_key(key)
         end
-      end
-
-      def collect_results_until_complete
-        results = []
-        until (response = @client.safe_read).include?("complete")
-          result = response.strip
-          results << result unless result == "-" || result.empty?
-          @client.log(response)
-        end
-        results
       end
 
       def parse_results(results)
@@ -157,7 +158,7 @@ module Jtagulator
           end
         end
 
-        parsed_data.push(current_data) if current_data.key?(:Baud)
+        parsed_data.push(current_data) if current_data.key?(:baud)
 
         parsed_data
       end
