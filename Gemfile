@@ -11,6 +11,4 @@ gem "rubocop", "~> 0.80"
 
 gem "serialport", "~> 1.3"
 
-gem "colorize", "~> 0.8"
-
-gem "json", "~> 2.3"
+gem "json", "~> 2.6"

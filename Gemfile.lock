@@ -7,7 +7,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     ast (2.4.2)
-    colorize (0.8.1)
+    colorize (1.1.0)
     json (2.6.3)
     parallel (1.23.0)
     parser (3.2.2.4)
@@ -37,8 +37,8 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
-  colorize (~> 0.8)
-  json (~> 2.3)
+  colorize (~> 1.1)
+  json (~> 2.6)
   jtagulator!
   rake (~> 13.0)
   rubocop (~> 0.80)

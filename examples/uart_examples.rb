@@ -10,7 +10,10 @@ def continuous_identify
       options: { 
         bring_low: true, 
         low_time: 100, 
-        high_time: 100
+        high_time: 100,
+        start_pin: 2,
+        end_pin: 3,
+        output_str: "\\x0D"
       }
     )
   end 

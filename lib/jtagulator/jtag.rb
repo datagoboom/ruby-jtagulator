@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Jtagulator
   module API
     class JTAG

@@ -83,21 +83,21 @@ module Jtagulator
         timestamp = Time.now.strftime("[%H:%M:%S]")
         if @debug
           if error
-            print timestamp.light_red
-            puts "[ERROR]  ".light_red + message.light_red
+            print timestamp
+            puts "[ERROR]  " + message
           else
             if message.include? "\r\r\n"
               prev_input = message.split("\r\r\n")[0]
-              print timestamp.light_yellow
-              puts "[INPUT]  ".light_yellow + prev_input.light_yellow
+              print timestamp
+              puts "[INPUT]  " + prev_input
               msgs = message.split("\r\r\n")[1].split("\r\n")
               msgs.each do |msg|
-                print timestamp.light_blue
-                puts "[OUTPUT] ".light_blue + msg.gsub("\r", "").gsub("\n", "").light_blue
+                print timestamp
+                puts "[OUTPUT] " + msg.gsub("\r", "").gsub("\n", "")
               end
             else
-              print timestamp.light_black
-              puts "[LOG]    ".light_black + message.light_black
+              print timestamp
+              puts "[LOG]    " + message
             end
           end
         end
